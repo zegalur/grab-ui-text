@@ -61,6 +61,7 @@ All configurable settings are at the top of `grab-ui.py`:
 - Because GrabUIText doesn't use OCR, it works only with applications that render their UI using the OS's native API. 
 - Currently, only Windows is supported. 
 - Linux support is planned in the near future.
+- Translation and text-to-speech require an Internet connection.
 
 ## License
 
