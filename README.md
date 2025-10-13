@@ -16,10 +16,10 @@ It lets you copy, translate, and read aloud UI text with simple keyboard shortcu
 ## Installation
 
 1. Install Python (if it's not already installed): https://www.python.org/downloads/
-2. Download the repository and unzip it somewhere (for example, into a `GrabUIText` directory), or clone it using Git:
+2. Download the repository and unzip it somewhere (for example, into a `grab-ui-text` directory), or clone it using Git:
 ```bash
-git clone https://github.com/...
-cd GrabUIText
+git clone https://github.com/zegalur/grab-ui-text.git
+cd grab-ui-text
 ```
 3. Install the dependencies by running `install.bat` or by running the following in the console:
 ```bash

@@ -1,12 +1,13 @@
 # A free tool for grabbing UI text from under the cursor.
 # Designed for language learners who have just switched their OS to the target 
 # language. For more information, please visit the official GitHub page:
-# ...
+# https://github.com/zegalur/grab-ui-text
+
 # Released under CC BY 4.0 in 2025 by Pavlo Savchuk (aka zegalur)
 
 APP_NAME = "GrabUIText"
 APP_VERSION = "1.0.0"
-GITHUB_PAGE = "http://..."
+GITHUB_PAGE = "https://github.com/zegalur/grab-ui-text"
 
 
 ################################## Settings ###################################
