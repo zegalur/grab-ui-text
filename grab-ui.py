@@ -45,7 +45,7 @@ ICON_FILE = "other/icon.svg"
 
 # About window music MP3 file:
 ABOUT_MUSIC_MP3 = "other/about_music.mp3"
-ABOUT_MUSIC_VOLUME = 0.3
+ABOUT_MUSIC_VOLUME = 0.15
 
 
 ################################### Imports ###################################
