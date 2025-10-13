@@ -1,0 +1,8 @@
+PyQt5
+pynput
+pyperclip
+edge-tts
+deep-translator
+comtypes
+just-playback
+asyncio

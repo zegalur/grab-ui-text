@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 4.2333332 4.2333333"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title
+     id="title1">GrabUIText Icon</title>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="8"
+     inkscape:cx="-6.4375"
+     inkscape:cy="17"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient4"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop4" />
+      <stop
+         style="stop-color:#909090;stop-opacity:1;"
+         offset="1"
+         id="stop5" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4"
+       id="linearGradient5"
+       x1="1.4463875"
+       y1="2.0135465"
+       x2="3.6661742"
+       y2="4.2333331"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:url(#linearGradient5);fill-opacity:1;stroke:#000000;stroke-width:0.137288;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       id="rect2"
+       width="4.0960455"
+       height="4.0960455"
+       x="0.068643712"
+       y="0.068643712"
+       ry="0.47543398"
+       rx="0.47543395" />
+    <g
+       id="text2"
+       transform="matrix(0.80663834,0,0,0.80663834,0.39625445,0.3893548)"
+       style="fill:#000000;fill-opacity:1">
+      <path
+         style="color:#000000;-inkscape-font-specification:'DejaVu Serif, Bold';fill:#000000;stroke-linejoin:round;-inkscape-stroke:none;fill-opacity:1"
+         d="M 2.9472099,0.63882414 2.8413333,1.0053201 Q 1.9393459,0.95034573 1.3244471,0.7182316 L 1.4873342,0.37616868 Q 2.1103774,0.5919941 2.9472099,0.63882414 Z M 0.93148195,1.6690851 Q 1.8232889,1.3514552 2.3465637,1.3514552 2.7497093,1.3514552 2.9838595,1.6120746 3.2180097,1.872694 3.2180097,2.2269734 3.2180097,2.7461761 2.8392972,3.1859713 2.4626208,3.6237304 1.7418453,3.8619528 L 1.5626695,3.5158177 Q 2.1612796,3.3427501 2.4992704,2.9905068 2.8372611,2.6362273 2.8372611,2.2330817 2.8372611,1.9968954 2.6926988,1.8584414 2.5501726,1.7179512 2.307878,1.7179512 2.1449909,1.7179512 1.7886754,1.8014309 1.4323598,1.8849105 1.0455029,2.0396533 Z"
+         id="path2" />
+      <path
+         style="color:#000000;-inkscape-font-specification:'DejaVu Serif, Bold';fill:#000000;stroke-linejoin:round;-inkscape-stroke:none;fill-opacity:1"
+         d="M 1.5039062,0.32617188 A 0.05292179,0.05292179 0 0 0 1.4394531,0.35351563 L 1.2773437,0.6953125 A 0.05292179,0.05292179 0 0 0 1.3066406,0.76757812 C 1.7232794,0.92485239 2.2327812,1.0217135 2.8378906,1.0585937 A 0.05292179,0.05292179 0 0 0 2.8925781,1.0195312 L 2.9980469,0.65429687 A 0.05292179,0.05292179 0 0 0 2.9492188,0.5859375 C 2.3951274,0.55492996 1.9134626,0.46804435 1.5039062,0.32617188 Z M 1.5175781,0.43359375 C 1.9116032,0.56526257 2.3664092,0.64612398 2.8808594,0.6796875 L 2.8046875,0.9453125 C 2.2508472,0.9084056 1.786397,0.81779356 1.4023437,0.6796875 Z M 2.3457031,1.2988281 C 1.9861468,1.2988281 1.5116815,1.40629 0.9140625,1.6191406 A 0.05292179,0.05292179 0 0 0 0.88085938,1.6855469 L 0.99414063,2.0546875 A 0.05292179,0.05292179 0 0 0 1.0644531,2.0878906 C 1.3202026,1.9855908 1.5661669,1.9084824 1.8007812,1.8535156 2.036581,1.7982711 2.2090424,1.7714844 2.3085938,1.7714844 2.4598958,1.7714844 2.5719092,1.8133484 2.65625,1.8964844 2.7417695,1.9783903 2.7851563,2.0857607 2.7851563,2.2324219 2.7851563,2.4863972 2.6793445,2.7241923 2.4609375,2.953125 2.2434183,3.1798166 1.9412521,3.3513878 1.5488281,3.4648438 A 0.05292179,0.05292179 0 0 0 1.515625,3.5410156 L 1.6953125,3.8867188 A 0.05292179,0.05292179 0 0 0 1.7578125,3.9121094 C 2.2448911,3.7511258 2.6200001,3.5215941 2.8789063,3.2207031 3.1380997,2.9197043 3.2714844,2.5855632 3.2714844,2.2265625 3.2714844,1.9787186 3.1875042,1.7587853 3.0234375,1.5761719 2.8572472,1.3911948 2.6258695,1.2988281 2.3457031,1.2988281 Z M 2.3457031,1.4042969 C 2.6030637,1.4042969 2.7993029,1.4839693 2.9453125,1.6464844 3.0934458,1.8113632 3.1660156,2.0020343 3.1660156,2.2265625 3.1660156,2.5598313 3.0445842,2.8669496 2.7988281,3.1523438 2.5642905,3.4249146 2.2123396,3.6336093 1.7636719,3.7890625 L 1.6328125,3.5351563 C 2.0061733,3.4178794 2.3173224,3.2563988 2.5371094,3.0273438 2.7693562,2.7839043 2.890625,2.5159734 2.890625,2.2324219 2.890625,2.0641683 2.8357457,1.9230117 2.7285156,1.8203125 2.6229374,1.7169795 2.4796516,1.6640625 2.3085938,1.6640625 2.1909626,1.6640625 2.0166308,1.6939384 1.7773437,1.75 1.5543699,1.8022395 1.3198862,1.8794112 1.0800781,1.9726562 L 0.99804688,1.7070312 C 1.5603743,1.5109874 2.0194212,1.4042969 2.3457031,1.4042969 Z"
+         id="path3" />
+    </g>
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>GrabUIText Icon</dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by/4.0/" />
+        <dc:date>2025/10/13</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Pavlo Savchuk</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>CC BY 4.0</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:contributor>
+          <cc:Agent>
+            <dc:title>Pavlo Savchuk</dc:title>
+          </cc:Agent>
+        </dc:contributor>
+        <dc:description>This icon was made for the GrabUIText project.</dc:description>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
