@@ -4,6 +4,9 @@ A free tool for grabbing UI text from under the cursor.
 Designed for language learners who have just switched their OS to the target language.
 It lets you copy, translate, and read aloud UI text with simple keyboard shortcuts. It doesn't use OCR. Instead, it uses native OS functions to retrieve the raw text.
 
+![(Windows search bar example)](other/search-bar-example.png)<br>
+<small>"スタート", "検索", "タスク ビュー", "Copilot 固定済み" etc., ... from the Windows Search Bar</small>
+
 ## Features
 
 - Grab UI text directly from under the mouse cursor
