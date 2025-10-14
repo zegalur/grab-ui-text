@@ -168,19 +168,21 @@ def get_text_under_cursor():
     if sys.platform == SYS_LINUX:
         desktop = pyatspi.Registry.getDesktop(0)
 
-        def find_element_at_point(acc, x, y):
-            if not acc:
-                return None
+        def find_element(acc, x, y):
             try:
                 comp = acc.queryComponent()
-                if comp.contains(x, y, pyatspi.DESKTOP_COORDS):
+                ext = comp.getExtents(pyatspi.DESKTOP_COORDS)
+                if PRINT_DEBUG_INFO:
+                    print(acc.getRoleName(), repr(acc.name), ext)
+                if (x >= ext[0] and x <= ext[0] + ext[2] and
+                    y >= ext[1] and y <= ext[1] + ext[3]):
                     for child in acc:
-                        result = find_element_at_point(child, x, y)
+                        result = find_element(child, x, y)
                         if result:
                             return result
                     return acc
-            except:
-                pass
+            except NotImplementedError:
+                return None
             return None
 
         '''acc = pyatspi.utils.findDescendant(
@@ -216,11 +218,13 @@ class OverlayWidget(QWidget):
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
-        self.setWindowFlags(
-                Qt.FramelessWindowHint | 
+        wnd_flags = Qt.FramelessWindowHint | 
                 Qt.WindowStaysOnTopHint | 
                 Qt.WindowTransparentForInput | 
-                Qt.Tool)
+                Qt.Tool
+        if sys.platform == SYS_LINUX:
+            wnd_flags = wnd_flags | Qt.X11BypassWindowManagerHint
+        self.setWindowFlags(wnd_flags)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.setGeometry(0, 0, 0, 0)
@@ -313,7 +317,8 @@ class SystemTrayApp(QObject):
         self.mp3_files = ["mp3/output_{}.mp3".format(i) for i in range(1,MP3_COUNT)]
         self.cur_mp3 = 0
 
-        self.tray = QSystemTrayIcon(QIcon(ICON_FILE))
+        icon_file = ICON_FILE if sys.platform == SYS_WINDOWS else "other\logo-24px.png"
+        self.tray = QSystemTrayIcon(QIcon(icon_file))
         self.tray.setToolTip(f"{APP_NAME} (v{APP_VERSION})")
         self.overlay = OverlayWidget()
 
