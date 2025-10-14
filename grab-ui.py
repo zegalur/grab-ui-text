@@ -135,6 +135,62 @@ def get_cursor_pos():
     return 0,0
 
 
+# Linux version of get_text_under_cursor():
+def get_text_under_cursor_linux(x, y):
+    if sys.platform != SYS_LINUX:
+        return None, None
+
+    try:
+        desktop = pyatspi.Registry.getDesktop(0)
+        acc = pyatspi.utils.findDescendant(
+            desktop,
+            lambda a: a.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS),
+            breadth_first=True)
+        if not acc:
+            if PRINT_DEBUG_INFO:
+                print(f"Info: No accessible element found at ({x}, {y})")
+            return None, None
+
+        # Get component extents
+        try:
+            comp = acc.queryComponent()
+            extents = comp.getExtents(pyatspi.DESKTOP_COORDS)
+        except Exception as e:
+            if PRINT_DEBUG_INFO:
+                print(f"Info: Error querying component: {e}")
+            return None, None
+
+        # Try to get text from the Text interface first
+        text = None
+        try:
+            text_interface = acc.queryText()
+            text = text_interface.getText(0, -1)  # Get full text content
+            if PRINT_DEBUG_INFO:
+                print(f"Info: Text interface content: {text}")
+        except (NotImplementedError, AttributeError):
+            if debug:
+                print("Info: Text interface not available")
+
+        # Fallback to acc.name or role
+        if not text or text.strip() == "":
+            try:
+                text = acc.name if acc.name else acc.getRoleName()
+            except Exception as e:
+                if PRINT_DEBUG_INFO:
+                    print(f"Info: Error getting name/role: {e}")
+                text = None
+
+        if PRINT_DEBUG_INFO:
+            print(f"Found element: role={acc.getRoleName()}, "
+                  +"text={text}, extents={extents}")
+        return text, extents
+
+    except Exception as e:
+        if PRINT_DEBUG_INFO:
+            print(f"get_text_under_cursor_linux() Exception: {e}")
+        return None, None
+
+
 # Returns UI's (text,(x,y,sx,sy)) from under the cursor.
 def get_text_under_cursor():
     global os_dep
@@ -166,42 +222,7 @@ def get_text_under_cursor():
                 print("get_text_under_cursor() Exception: " + e)
 
     if sys.platform == SYS_LINUX:
-        desktop = pyatspi.Registry.getDesktop(0)
-
-        def find_element(acc, x, y):
-            try:
-                comp = acc.queryComponent()
-                ext = comp.getExtents(pyatspi.DESKTOP_COORDS)
-                if PRINT_DEBUG_INFO:
-                    print(acc.getRoleName(), repr(acc.name), ext)
-                if (x >= ext[0] and x <= ext[0] + ext[2] and
-                    y >= ext[1] and y <= ext[1] + ext[3]):
-                    for child in acc:
-                        result = find_element(child, x, y)
-                        if result:
-                            return result
-                    return acc
-            except NotImplementedError:
-                return None
-            return None
-
-        '''acc = pyatspi.utils.findDescendant(
-            desktop,
-            lambda a: a.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
-        )'''
-        
-        acc = find_element_at_point(desktop, x, y)
-
-        if acc:
-            comp = acc.queryComponent()
-            extents = comp.getExtents(pyatspi.DESKTOP_COORDS)
-            try:
-                name = acc.name
-                role = acc.getRoleName()
-                return (name if name != "" else role, extents)
-            except Exception as e:
-                if PRINT_DEBUG_INFO:
-                    print("get_text_under_cursor() Exception: " + e)
+        return get_text_under_cursor_linux(x, y)
 
     if PRINT_DEBUG_INFO:
         print("Warning: get_text_under_cursor() will return an empty string.")
@@ -317,7 +338,7 @@ class SystemTrayApp(QObject):
         self.mp3_files = ["mp3/output_{}.mp3".format(i) for i in range(1,MP3_COUNT)]
         self.cur_mp3 = 0
 
-        icon_file = ICON_FILE if sys.platform == SYS_WINDOWS else "other\logo-24px.png"
+        icon_file = ICON_FILE if sys.platform == SYS_WINDOWS else "other/logo-24px.png"
         self.tray = QSystemTrayIcon(QIcon(icon_file))
         self.tray.setToolTip(f"{APP_NAME} (v{APP_VERSION})")
         self.overlay = OverlayWidget()
