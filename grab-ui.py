@@ -136,58 +136,80 @@ def get_cursor_pos():
 
 
 # Linux version of get_text_under_cursor():
-def get_text_under_cursor_linux(x, y):
+def get_text_under_cursor(x, y, debug=True):
     if sys.platform != SYS_LINUX:
+        if debug:
+            print("This script is only supported on Linux.")
         return None, None
 
     try:
         desktop = pyatspi.Registry.getDesktop(0)
-        acc = pyatspi.utils.findDescendant(
-            desktop,
-            lambda a: a.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS),
-            breadth_first=True)
-        if not acc:
-            if PRINT_DEBUG_INFO:
-                print(f"Info: No accessible element found at ({x}, {y})")
+        if debug:
+            print(f"Desktop accessible: {desktop}, child count: {desktop.getChildCount()}")
+
+        # Collect all elements that contain the cursor
+        matching_elements = []
+
+        def find_elements(acc, x, y, depth=0):
+            try:
+                comp = acc.queryComponent()
+                ext = comp.getExtents(pyatspi.DESKTOP_COORDS)
+                if debug:
+                    print(f"Depth {depth}: role={acc.getRoleName()}, name={acc.name}, extents={ext}")
+                if (x >= ext.x and x <= ext.x + ext.width and
+                    y >= ext.y and y <= ext.y + ext.height):
+                    area = ext.width * ext.height
+                    matching_elements.append((acc, ext, depth, area))
+                for child in acc:
+                    find_elements(child, x, y, depth + 1)
+            except (NotImplementedError, AttributeError) as e:
+                if debug:
+                    print(f"Depth {depth}: Skipping element, error: {e}")
+                return
+
+        # Traverse the entire tree to collect all matches
+        find_elements(desktop, x, y)
+
+        if not matching_elements:
+            if debug:
+                print(f"No accessible elements found at ({x}, {y})")
             return None, None
 
-        # Get component extents
-        try:
-            comp = acc.queryComponent()
-            extents = comp.getExtents(pyatspi.DESKTOP_COORDS)
-        except Exception as e:
-            if PRINT_DEBUG_INFO:
-                print(f"Info: Error querying component: {e}")
-            return None, None
+        # Select the topmost element: prefer deepest (highest depth) or smallest area
+        topmost = max(matching_elements, key=lambda x: (x[2], -x[3]))
+        acc, extents, depth, area = topmost
 
-        # Try to get text from the Text interface first
+        if debug:
+            print(f"Topmost element: depth={depth}, role={acc.getRoleName()}, name={acc.name}, extents={extents}, area={area}")
+
+        # Try to get text from the Text interface
         text = None
         try:
             text_interface = acc.queryText()
-            text = text_interface.getText(0, -1)  # Get full text content
-            if PRINT_DEBUG_INFO:
-                print(f"Info: Text interface content: {text}")
+            text = text_interface.getText(0, -1)
+            if debug:
+                print(f"Text interface content: {text}")
         except (NotImplementedError, AttributeError):
-            if PRINT_DEBUG_INFO:
-                print("Info: Text interface not available")
+            if debug:
+                print("Text interface not available")
 
         # Fallback to acc.name or role
         if not text or text.strip() == "":
             try:
                 text = acc.name if acc.name else acc.getRoleName()
             except Exception as e:
-                if PRINT_DEBUG_INFO:
-                    print(f"Info: Error getting name/role: {e}")
+                if debug:
+                    print(f"Error getting name/role: {e}")
                 text = None
 
-        if PRINT_DEBUG_INFO:
-            print(f"Found element: role={acc.getRoleName()}, "
-                  +"text={text}, extents={extents}")
+        if debug:
+            print(f"Final element: role={acc.getRoleName()}, text={text}, extents={extents}")
+
         return text, extents
 
     except Exception as e:
-        if PRINT_DEBUG_INFO:
-            print(f"get_text_under_cursor_linux() Exception: {e}")
+        if debug:
+            print(f"get_text_under_cursor() Exception: {e}")
         return None, None
 
 
@@ -222,7 +244,7 @@ def get_text_under_cursor():
                 print("get_text_under_cursor() Exception: " + e)
 
     if sys.platform == SYS_LINUX:
-        return get_text_under_cursor_linux(x, y)
+        return get_text_under_cursor_linux(x, y, PRINT_DEBUG_INFO)
 
     if PRINT_DEBUG_INFO:
         print("Warning: get_text_under_cursor() will return an empty string.")
