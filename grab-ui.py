@@ -218,10 +218,10 @@ class OverlayWidget(QWidget):
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
-        wnd_flags = Qt.FramelessWindowHint | 
+        wnd_flags = (Qt.FramelessWindowHint | 
                 Qt.WindowStaysOnTopHint | 
                 Qt.WindowTransparentForInput | 
-                Qt.Tool
+                Qt.Tool)
         if sys.platform == SYS_LINUX:
             wnd_flags = wnd_flags | Qt.X11BypassWindowManagerHint
         self.setWindowFlags(wnd_flags)
