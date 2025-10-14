@@ -168,7 +168,7 @@ def get_text_under_cursor_linux(x, y):
             if PRINT_DEBUG_INFO:
                 print(f"Info: Text interface content: {text}")
         except (NotImplementedError, AttributeError):
-            if debug:
+            if PRINT_DEBUG_INFO:
                 print("Info: Text interface not available")
 
         # Fallback to acc.name or role
