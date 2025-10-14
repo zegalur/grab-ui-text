@@ -29,6 +29,7 @@ cd grab-ui-text
 pip install -r requirements.txt
 ```
 4. Additionally, for [Yomitan](https://yomitan.wiki/) users, you can turn ON the "Enable background clipboard text monitoring" option in Yomitan - a Yomitan pop-up window will appear whenever a UI text is copied.
+5. Finally, you can create a (desktop) shortcut to `GrabUIText.bat` and set its icon to `other/logo.ico`.
 
 ## Usage
 
