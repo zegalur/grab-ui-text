@@ -167,10 +167,29 @@ def get_text_under_cursor():
 
     if sys.platform == SYS_LINUX:
         desktop = pyatspi.Registry.getDesktop(0)
-        acc = pyatspi.utils.findDescendant(
+
+        def find_element_at_point(acc, x, y):
+            if not acc:
+                return None
+            try:
+                comp = acc.queryComponent()
+                if comp.contains(x, y, pyatspi.DESKTOP_COORDS):
+                    for child in acc:
+                        result = find_element_at_point(child, x, y)
+                        if result:
+                            return result
+                    return acc
+            except:
+                pass
+            return None
+
+        '''acc = pyatspi.utils.findDescendant(
             desktop,
             lambda a: a.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
-        )
+        )'''
+        
+        acc = find_element_at_point(desktop, x, y)
+
         if acc:
             comp = acc.queryComponent()
             extents = comp.getExtents(pyatspi.DESKTOP_COORDS)
