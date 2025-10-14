@@ -81,9 +81,12 @@ os_dep = {}
 
 # System dependent imports.
 # Returns a non-empty error message string on error.
+
 sys_dep_init_err_msg = ""
+
 if PRINT_DEBUG_INFO:
     print("Info: sys.platform == " + sys.platform)
+
 if sys.platform == SYS_WINDOWS:
     import comtypes
     import comtypes.client
@@ -101,9 +104,11 @@ if sys.platform == SYS_WINDOWS:
     # Create the object and cast it to IUIAutomation
     os_dep["automation"] = comtypes.client.CreateObject(
             CLSID_CUIAutomation, interface=IUIAutomation)
+
 elif sys.platform == SYS_LINUX:
     import pyatspi
     import pyautogui
+
 else:
     # Unsupported platform:
     sys_dep_init_err_msg = (
@@ -134,6 +139,8 @@ def get_cursor_pos():
 def get_text_under_cursor():
     global os_dep
     x, y = get_cursor_pos()
+    if PRINT_DEBUG_INFO:
+        print(f"Info: Cursor position: ({x}, {y})")
 
     if sys.platform == SYS_WINDOWS:
         pt = wintypes.POINT(x, y)
