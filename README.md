@@ -24,9 +24,14 @@ It lets you copy, translate, and read aloud UI text with simple keyboard shortcu
 git clone https://github.com/zegalur/grab-ui-text.git
 cd grab-ui-text
 ```
-3. Install the dependencies by running `install.bat` or by running the following in the console:
+3. Install the dependencies:
+    - (**Windows**) Run `install.bat` or the following in the console:
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-windows.txt
+```
+    - (**Linux**) Run in terminal:
+```bash
+pip3 install -r requirements-linux.txt
 ```
 4. Additionally, for [Yomitan](https://yomitan.wiki/) users, you can turn ON the "Enable background clipboard text monitoring" option in Yomitan - a Yomitan pop-up window will appear whenever a UI text is copied.
 5. (Optional) Create a (desktop) shortcut to `GrabUIText.bat` and set its icon to `other/logo.ico`.

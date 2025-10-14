@@ -73,9 +73,9 @@ from deep_translator import GoogleTranslator
 # (https://stackoverflow.com/questions/446209/possible-values-from-sys-platform)
 SYS_WINDOWS = "win32"
 # TODO: Add Linux and MacOS support.
-#SYS_LINUX = "linux"
+SYS_LINUX = "linux"
 #SYS_MACOS = "darwin"
-SUPPORTED_PLATFORMS = [ SYS_WINDOWS ]
+SUPPORTED_PLATFORMS = [ SYS_WINDOWS, SYS_LINUX ]
 
 os_dep = {}
 
@@ -101,6 +101,9 @@ if sys.platform == SYS_WINDOWS:
     # Create the object and cast it to IUIAutomation
     os_dep["automation"] = comtypes.client.CreateObject(
             CLSID_CUIAutomation, interface=IUIAutomation)
+elif sys.platform == SYS_LINUX:
+    import pyatspi
+    import pyautogui
 else:
     # Unsupported platform:
     sys_dep_init_err_msg = (
@@ -122,6 +125,8 @@ def get_cursor_pos():
         pt = wintypes.POINT()
         windll.user32.GetCursorPos(byref(pt))
         return pt.x, pt.y
+    elif sys.platform == SYS_LINUX:
+        return pyautogui.position() # x,y
     return 0,0
 
 
@@ -152,6 +157,23 @@ def get_text_under_cursor():
         except Exception as e:
             if PRINT_DEBUG_INFO:
                 print("get_text_under_cursor() Exception: " + e)
+
+    if sys.platform == SYS_LINUX:
+        desktop = pyatspi.Registry.getDesktop(0)
+        acc = pyatspi.utils.findDescendant(
+            desktop,
+            lambda a: a.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
+        )
+        if acc:
+            comp = acc.queryComponent()
+            extents = comp.getExtents(pyatspi.DESKTOP_COORDS)
+            try:
+                name = acc.name
+                role = acc.getRoleName()
+                return (name if name != "" else role, extents)
+            except Exception as e:
+                if PRINT_DEBUG_INFO:
+                    print("get_text_under_cursor() Exception: " + e)
 
     if PRINT_DEBUG_INFO:
         print("Warning: get_text_under_cursor() will return an empty string.")
