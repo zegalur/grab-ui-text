@@ -72,7 +72,7 @@ sudo apt-get install python3-tk python3-dev
     - (*Linux*) `GrabUIText.sh`
 2. A console window will open. 
 3. After a short moment, the icon ![(icon)](other/icon.svg) will appear in the system tray, and you should see `READY!` in the console.
-4. You can now use the app.
+4. You can now use the app. Hover the mouse cursor over the UI text you want to grab, read, or translate, and use one of the shortcuts.
 5. Right-click the tray icon to access the app controls.
 6. A history of all grabbed text is available in the console window.
 7. **Translation and text-to-speech require an Internet connection.**
@@ -100,9 +100,7 @@ All configurable settings are at the top of `grab-ui.py`:
 ## Limitations
 
 - Because GrabUIText doesn't use OCR, it works only with applications that render their UI using the OS's native API. 
-- Currently, only Windows is supported. 
-- Linux support is planned in the near future.
-- Translation and text-to-speech require an Internet connection.
+- **Translation and text-to-speech require an Internet connection.**
 
 ## Troubleshooting
 
