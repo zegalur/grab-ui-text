@@ -47,6 +47,27 @@ ICON_FILE = "other/icon.svg"
 ABOUT_MUSIC_MP3 = "other/about_music.mp3"
 ABOUT_MUSIC_VOLUME = 0.15
 
+# About window text:
+ABOUT_TEXT = (f"<b>{APP_NAME}</b> (v{APP_VERSION}) by <i>Pavlo Savchuk</i> " +
+              f"(aka zegalur)<br>(music by King)<hr>For more information, " + 
+              f"please visit the official GitHub page:<br>" +
+              f"<a href='{GITHUB_PAGE}'>{GITHUB_PAGE}</a>")
+
+# Help/Info window text:
+HELP_TEXT = (f"<b>{APP_NAME}</b> (v{APP_VERSION})<hr>" + 
+             f"A free tool that captures UI text from under the mouse cursor" +
+             f", designed to help language learners who’ve just switched their"+
+             f" OS to the target language.<hr>" + 
+             f"<b>Shortcuts:</b><br>" + 
+             f"1. Copy: " + 
+             f"{COPY_TEXT_CMD.replace('<','&lt;').replace('>','&gt;').upper()}<br>" +
+             f"2. Read ({TR_FROM}): " + 
+             f"{SAY_TEXT_CMD.replace('<','&lt;').replace('>','&gt;').upper()}<br>" +
+             f"3. Translate ({TR_FROM}&rarr;{TR_TO}): " + 
+             f"{TR_TEXT_CMD.replace('<','&lt;').replace('>','&gt;').upper()}<hr>" +
+             f"For more information, please visit the official GitHub page:<br>" +
+             f"<a href='{GITHUB_PAGE}'>{GITHUB_PAGE}</a>")
+
 
 ################################### Imports ###################################
 
@@ -73,17 +94,20 @@ from deep_translator import GoogleTranslator
 # (https://stackoverflow.com/questions/446209/possible-values-from-sys-platform)
 SYS_WINDOWS = "win32"
 # TODO: Add Linux and MacOS support.
-#SYS_LINUX = "linux"
+SYS_LINUX = "linux"
 #SYS_MACOS = "darwin"
-SUPPORTED_PLATFORMS = [ SYS_WINDOWS ]
+SUPPORTED_PLATFORMS = [ SYS_WINDOWS, SYS_LINUX ]
 
 os_dep = {}
 
 # System dependent imports.
 # Returns a non-empty error message string on error.
+
 sys_dep_init_err_msg = ""
+
 if PRINT_DEBUG_INFO:
     print("Info: sys.platform == " + sys.platform)
+
 if sys.platform == SYS_WINDOWS:
     import comtypes
     import comtypes.client
@@ -101,6 +125,12 @@ if sys.platform == SYS_WINDOWS:
     # Create the object and cast it to IUIAutomation
     os_dep["automation"] = comtypes.client.CreateObject(
             CLSID_CUIAutomation, interface=IUIAutomation)
+
+elif sys.platform == SYS_LINUX:
+    import pyatspi
+    import pyautogui
+    from Xlib import display,X
+
 else:
     # Unsupported platform:
     sys_dep_init_err_msg = (
@@ -122,13 +152,86 @@ def get_cursor_pos():
         pt = wintypes.POINT()
         windll.user32.GetCursorPos(byref(pt))
         return pt.x, pt.y
+    elif sys.platform == SYS_LINUX:
+        return pyautogui.position() # x,y
     return 0,0
+
+
+# Returns a list of window IDs in stacking order (bottom-to-top).
+def get_stack_order_linux(displ):
+    root = displ.screen().root
+    prop = root.get_full_property(
+            displ.intern_atom("_NET_CLIENT_LIST_STACKING"),
+            X.AnyPropertyType)
+    return prop.value if prop else []
+
+
+# Returns X Window PID.
+def get_window_pid_linux(displ, win_id):
+    pid_atom = displ.intern_atom("_NET_WM_PID")
+    window = displ.create_resource_object("window", win_id)
+    pid_prop = window.get_full_property(pid_atom, X.AnyPropertyType)
+    if pid_prop and pid_prop.value:
+        return pid_prop.value[0]
+    return None
+
+
+# Linux version of get_text_under_cursor():
+def get_text_under_cursor_linux(x, y):
+    if sys.platform != SYS_LINUX:
+        if PRINT_DEBUG_INFO:
+            print("This script is only supported on Linux.")
+        return None, None
+
+    try:
+        d = display.Display()
+        stack_order = list(get_stack_order_linux(d))
+        stack_order.reverse()
+        pids = list(map(lambda wid: get_window_pid_linux(d, wid), stack_order))
+        if PRINT_DEBUG_INFO:
+            print(f"Info: stack order: {stack_order}")
+            print(f"Info: PIDs (ordered): {pids}")
+        desktop = pyatspi.Registry.getDesktop(0)
+        for pid in pids:
+            if PRINT_DEBUG_INFO:
+                print(f"PID = {pid}:")
+            apps = [app for app in desktop 
+                    if app.get_process_id() == pid]
+            for app in apps:
+                if PRINT_DEBUG_INFO:
+                    print(f"  {app} {app.get_process_id()}")
+                for obj in app:
+                    try:
+                        comp = obj.queryComponent()
+                        el = comp.getAccessibleAtPoint(
+                                x, y, pyatspi.DESKTOP_COORDS)
+                        if not el:
+                            continue
+                        if PRINT_DEBUG_INFO:
+                            print(f"    {obj} -> {el}")
+                        if el.name and len(el.name) > 0:
+                            if PRINT_DEBUG_INFO:
+                                print(f"Found! {el.name}")
+                            text = el.name
+                            extents = el.queryComponent().getExtents(
+                                    pyatspi.DESKTOP_COORDS)
+                            return text, extents
+                    except:
+                        pass
+        return "", (0,0,0,0)
+
+    except Exception as e:
+        if PRINT_DEBUG_INFO:
+            print("Exception: get_text_under_cursor_linux(): " + str(e))
+        return "", (0,0,0,0)
 
 
 # Returns UI's (text,(x,y,sx,sy)) from under the cursor.
 def get_text_under_cursor():
     global os_dep
     x, y = get_cursor_pos()
+    if PRINT_DEBUG_INFO:
+        print(f"Info: Cursor position: ({x}, {y})")
 
     if sys.platform == SYS_WINDOWS:
         pt = wintypes.POINT(x, y)
@@ -153,6 +256,9 @@ def get_text_under_cursor():
             if PRINT_DEBUG_INFO:
                 print("get_text_under_cursor() Exception: " + e)
 
+    if sys.platform == SYS_LINUX:
+        return get_text_under_cursor_linux(x, y)
+
     if PRINT_DEBUG_INFO:
         print("Warning: get_text_under_cursor() will return an empty string.")
     
@@ -168,11 +274,13 @@ class OverlayWidget(QWidget):
         self.timer = QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.hide)
-        self.setWindowFlags(
-                Qt.FramelessWindowHint | 
+        wnd_flags = (Qt.FramelessWindowHint | 
                 Qt.WindowStaysOnTopHint | 
                 Qt.WindowTransparentForInput | 
                 Qt.Tool)
+        if sys.platform == SYS_LINUX:
+            wnd_flags = wnd_flags | Qt.X11BypassWindowManagerHint
+        self.setWindowFlags(wnd_flags)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.setGeometry(0, 0, 0, 0)
@@ -265,7 +373,8 @@ class SystemTrayApp(QObject):
         self.mp3_files = ["mp3/output_{}.mp3".format(i) for i in range(1,MP3_COUNT)]
         self.cur_mp3 = 0
 
-        self.tray = QSystemTrayIcon(QIcon(ICON_FILE))
+        icon_file = ICON_FILE if sys.platform == SYS_WINDOWS else "other/logo-24px.png"
+        self.tray = QSystemTrayIcon(QIcon(icon_file))
         self.tray.setToolTip(f"{APP_NAME} (v{APP_VERSION})")
         self.overlay = OverlayWidget()
 
@@ -274,13 +383,18 @@ class SystemTrayApp(QObject):
         show_action = QAction("Show Overlay", self.tray)
         show_action.setCheckable(True)
         show_action.setChecked(True)
+        help_action = QAction("Help / Info", self.tray)
+        help_action.triggered.connect(self.show_help_wnd)
         about_action = QAction("About", self.tray)
         about_action.triggered.connect(self.show_about_wnd)
         quit_action = QAction("Quit", self.tray)
         show_action.triggered.connect(self.overlay.toggle_rect)
         quit_action.triggered.connect(self.app.quit)
         menu.addAction(show_action)
+        menu.addSeparator()
+        menu.addAction(help_action)
         menu.addAction(about_action)
+        menu.addSeparator()
         menu.addAction(quit_action)
         self.tray.setContextMenu(menu)
         self.tray.show()
@@ -306,10 +420,7 @@ class SystemTrayApp(QObject):
         msg.setIcon(QMessageBox.Information)
         msg.setTextFormat(Qt.RichText)
         msg.setWindowTitle("About Information")
-        msg.setText("<b>" + APP_NAME + "</b> (v" + APP_VERSION + ") "+ 
-            "by <i>Pavlo Savchuk</i> (aka zegalur)<br>(music by King)<hr>"+
-            "For more information, please visit the official GitHub page:<br>"+ 
-            "<a href='" + GITHUB_PAGE + "'>" + GITHUB_PAGE + "</a>")
+        msg.setText(ABOUT_TEXT)
         timer = QTimer(self)
         snake_pos, snake = 0, ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
         def upd_snake():
@@ -323,6 +434,15 @@ class SystemTrayApp(QObject):
         midi_player.stop()
         timer.stop()
         timer.deleteLater()
+
+    def show_help_wnd(self):
+        msg = QMessageBox()
+        msg.setWindowIcon(QIcon(ICON_FILE))
+        msg.setIcon(QMessageBox.Information)
+        msg.setTextFormat(Qt.RichText)
+        msg.setWindowTitle("Help Information")
+        msg.setText(HELP_TEXT)
+        msg.exec_()
 
     def toggle_overlay(self):
         self.overlay.toggle_visibility()

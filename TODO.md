@@ -4,7 +4,6 @@ GrabUIText TODO list
 
 ### To Do
 
-- [ ] Add Linux support.
 - [ ] Add MacOS support.
 
 ### In Progress
@@ -12,4 +11,5 @@ GrabUIText TODO list
 ### Done ✓
 
 - [x] First working version.
+- [x] Add Linux support.
 

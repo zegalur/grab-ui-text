@@ -1,0 +1,9 @@
+PyQt5
+pynput
+pyperclip
+edge-tts
+deep-translator
+just-playback
+asyncio
+python3-pyatspi
+pyautogui
