@@ -47,6 +47,27 @@ ICON_FILE = "other/icon.svg"
 ABOUT_MUSIC_MP3 = "other/about_music.mp3"
 ABOUT_MUSIC_VOLUME = 0.15
 
+# About window text:
+ABOUT_TEXT = (f"<b>{APP_NAME}</b> (v{APP_VERSION}) by <i>Pavlo Savchuk</i> " +
+              f"(aka zegalur)<br>(music by King)<hr>For more information, " + 
+              f"please visit the official GitHub page:<br>" +
+              f"<a href='{GITHUB_PAGE}'>{GITHUB_PAGE}</a>")
+
+# Help/Info window text:
+HELP_TEXT = (f"<b>{APP_NAME}</b> (v{APP_VERSION})<hr>" + 
+             f"A free tool that captures UI text from under the mouse cursor" +
+             f", designed to help language learners who’ve just switched their"+
+             f" OS to the target language.<hr>" + 
+             f"<b>Shortcuts:</b><br>" + 
+             f"1. Copy: " + 
+             f"{COPY_TEXT_CMD.replace('<','&lt;').replace('>','&gt;').upper()}<br>" +
+             f"2. Read ({TR_FROM}): " + 
+             f"{SAY_TEXT_CMD.replace('<','&lt;').replace('>','&gt;').upper()}<br>" +
+             f"3. Translate ({TR_FROM}&rarr;{TR_TO}): " + 
+             f"{TR_TEXT_CMD.replace('<','&lt;').replace('>','&gt;').upper()}<hr>" +
+             f"For more information, please visit the official GitHub page:<br>" +
+             f"<a href='{GITHUB_PAGE}'>{GITHUB_PAGE}</a>")
+
 
 ################################### Imports ###################################
 
@@ -108,6 +129,7 @@ if sys.platform == SYS_WINDOWS:
 elif sys.platform == SYS_LINUX:
     import pyatspi
     import pyautogui
+    from Xlib import display,X
 
 else:
     # Unsupported platform:
@@ -135,82 +157,73 @@ def get_cursor_pos():
     return 0,0
 
 
+# Returns a list of window IDs in stacking order (bottom-to-top).
+def get_stack_order_linux(displ):
+    root = displ.screen().root
+    prop = root.get_full_property(
+            displ.intern_atom("_NET_CLIENT_LIST_STACKING"),
+            X.AnyPropertyType)
+    return prop.value if prop else []
+
+
+# Returns X Window PID.
+def get_window_pid_linux(displ, win_id):
+    pid_atom = displ.intern_atom("_NET_WM_PID")
+    window = displ.create_resource_object("window", win_id)
+    pid_prop = window.get_full_property(pid_atom, X.AnyPropertyType)
+    if pid_prop and pid_prop.value:
+        return pid_prop.value[0]
+    return None
+
+
 # Linux version of get_text_under_cursor():
-def get_text_under_cursor(x, y, debug=True):
+def get_text_under_cursor_linux(x, y):
     if sys.platform != SYS_LINUX:
-        if debug:
+        if PRINT_DEBUG_INFO:
             print("This script is only supported on Linux.")
         return None, None
 
     try:
+        d = display.Display()
+        stack_order = list(get_stack_order_linux(d))
+        stack_order.reverse()
+        pids = list(map(lambda wid: get_window_pid_linux(d, wid), stack_order))
+        if PRINT_DEBUG_INFO:
+            print(f"Info: stack order: {stack_order}")
+            print(f"Info: PIDs (ordered): {pids}")
         desktop = pyatspi.Registry.getDesktop(0)
-        if debug:
-            print(f"Desktop accessible: {desktop}, child count: {desktop.getChildCount()}")
-
-        # Collect all elements that contain the cursor
-        matching_elements = []
-
-        def find_elements(acc, x, y, depth=0):
-            try:
-                comp = acc.queryComponent()
-                ext = comp.getExtents(pyatspi.DESKTOP_COORDS)
-                if debug:
-                    print(f"Depth {depth}: role={acc.getRoleName()}, name={acc.name}, extents={ext}")
-                if (x >= ext.x and x <= ext.x + ext.width and
-                    y >= ext.y and y <= ext.y + ext.height):
-                    area = ext.width * ext.height
-                    matching_elements.append((acc, ext, depth, area))
-                for child in acc:
-                    find_elements(child, x, y, depth + 1)
-            except (NotImplementedError, AttributeError) as e:
-                if debug:
-                    print(f"Depth {depth}: Skipping element, error: {e}")
-                return
-
-        # Traverse the entire tree to collect all matches
-        find_elements(desktop, x, y)
-
-        if not matching_elements:
-            if debug:
-                print(f"No accessible elements found at ({x}, {y})")
-            return None, None
-
-        # Select the topmost element: prefer deepest (highest depth) or smallest area
-        topmost = max(matching_elements, key=lambda x: (x[2], -x[3]))
-        acc, extents, depth, area = topmost
-
-        if debug:
-            print(f"Topmost element: depth={depth}, role={acc.getRoleName()}, name={acc.name}, extents={extents}, area={area}")
-
-        # Try to get text from the Text interface
-        text = None
-        try:
-            text_interface = acc.queryText()
-            text = text_interface.getText(0, -1)
-            if debug:
-                print(f"Text interface content: {text}")
-        except (NotImplementedError, AttributeError):
-            if debug:
-                print("Text interface not available")
-
-        # Fallback to acc.name or role
-        if not text or text.strip() == "":
-            try:
-                text = acc.name if acc.name else acc.getRoleName()
-            except Exception as e:
-                if debug:
-                    print(f"Error getting name/role: {e}")
-                text = None
-
-        if debug:
-            print(f"Final element: role={acc.getRoleName()}, text={text}, extents={extents}")
-
-        return text, extents
+        for pid in pids:
+            if PRINT_DEBUG_INFO:
+                print(f"PID = {pid}:")
+            apps = [app for app in desktop 
+                    if app.get_process_id() == pid]
+            for app in apps:
+                if PRINT_DEBUG_INFO:
+                    print(f"  {app} {app.get_process_id()}")
+                for obj in app:
+                    try:
+                        comp = obj.queryComponent()
+                        el = comp.getAccessibleAtPoint(
+                                x, y, pyatspi.DESKTOP_COORDS)
+                        if not el:
+                            continue
+                        if PRINT_DEBUG_INFO:
+                            print(f"    {obj} -> {el}")
+                        if el.name and len(el.name) > 0:
+                            if PRINT_DEBUG_INFO:
+                                print(f"Found! {el.name}")
+                            text = el.name
+                            extents = el.queryComponent().getExtents(
+                                    pyatspi.DESKTOP_COORDS)
+                            return text, extents
+                    except:
+                        pass
+        return "", (0,0,0,0)
 
     except Exception as e:
-        if debug:
-            print(f"get_text_under_cursor() Exception: {e}")
-        return None, None
+        if PRINT_DEBUG_INFO:
+            print("Exception: get_text_under_cursor_linux(): " + str(e))
+        return "", (0,0,0,0)
 
 
 # Returns UI's (text,(x,y,sx,sy)) from under the cursor.
@@ -244,7 +257,7 @@ def get_text_under_cursor():
                 print("get_text_under_cursor() Exception: " + e)
 
     if sys.platform == SYS_LINUX:
-        return get_text_under_cursor_linux(x, y, PRINT_DEBUG_INFO)
+        return get_text_under_cursor_linux(x, y)
 
     if PRINT_DEBUG_INFO:
         print("Warning: get_text_under_cursor() will return an empty string.")
@@ -370,13 +383,18 @@ class SystemTrayApp(QObject):
         show_action = QAction("Show Overlay", self.tray)
         show_action.setCheckable(True)
         show_action.setChecked(True)
+        help_action = QAction("Help / Info", self.tray)
+        help_action.triggered.connect(self.show_help_wnd)
         about_action = QAction("About", self.tray)
         about_action.triggered.connect(self.show_about_wnd)
         quit_action = QAction("Quit", self.tray)
         show_action.triggered.connect(self.overlay.toggle_rect)
         quit_action.triggered.connect(self.app.quit)
         menu.addAction(show_action)
+        menu.addSeparator()
+        menu.addAction(help_action)
         menu.addAction(about_action)
+        menu.addSeparator()
         menu.addAction(quit_action)
         self.tray.setContextMenu(menu)
         self.tray.show()
@@ -402,10 +420,7 @@ class SystemTrayApp(QObject):
         msg.setIcon(QMessageBox.Information)
         msg.setTextFormat(Qt.RichText)
         msg.setWindowTitle("About Information")
-        msg.setText("<b>" + APP_NAME + "</b> (v" + APP_VERSION + ") "+ 
-            "by <i>Pavlo Savchuk</i> (aka zegalur)<br>(music by King)<hr>"+
-            "For more information, please visit the official GitHub page:<br>"+ 
-            "<a href='" + GITHUB_PAGE + "'>" + GITHUB_PAGE + "</a>")
+        msg.setText(ABOUT_TEXT)
         timer = QTimer(self)
         snake_pos, snake = 0, ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
         def upd_snake():
@@ -419,6 +434,15 @@ class SystemTrayApp(QObject):
         midi_player.stop()
         timer.stop()
         timer.deleteLater()
+
+    def show_help_wnd(self):
+        msg = QMessageBox()
+        msg.setWindowIcon(QIcon(ICON_FILE))
+        msg.setIcon(QMessageBox.Information)
+        msg.setTextFormat(Qt.RichText)
+        msg.setWindowTitle("Help Information")
+        msg.setText(HELP_TEXT)
+        msg.exec_()
 
     def toggle_overlay(self):
         self.overlay.toggle_visibility()
