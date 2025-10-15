@@ -6,7 +6,7 @@
 # Released under CC BY 4.0 in 2025 by Pavlo Savchuk (aka zegalur)
 
 APP_NAME = "GrabUIText"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 GITHUB_PAGE = "https://github.com/zegalur/grab-ui-text"
 
 
@@ -39,6 +39,9 @@ OVERLAY_DURATION = 10000
 
 # The number of temporary MP3 files (must be >1):
 MP3_COUNT = 10
+
+# Maximum text length:
+MAX_TEXT_LENGTH = 128
 
 # Tray icon file:
 ICON_FILE = "other/icon.svg"
@@ -97,6 +100,13 @@ SYS_WINDOWS = "win32"
 SYS_LINUX = "linux"
 #SYS_MACOS = "darwin"
 SUPPORTED_PLATFORMS = [ SYS_WINDOWS, SYS_LINUX ]
+
+# Disable Keyboard Interrupt:
+import signal
+signal.signal(signal.SIGINT,  signal.SIG_IGN)
+if sys.platform != SYS_WINDOWS:
+    signal.signal(signal.SIGQUIT, signal.SIG_IGN)
+    signal.signal(signal.SIGTSTP, signal.SIG_IGN)
 
 os_dep = {}
 
@@ -176,12 +186,55 @@ def get_window_pid_linux(displ, win_id):
     return None
 
 
+# Checks if accessible is visible.
+def is_visible_linux(d, acc):
+    return True
+    # TODO: fix: Visibility check isn't working.
+    state = acc.getState()
+    if state.contains(pyatspi.STATE_ICONIFIED):
+        return False
+    if state.contains(pyatspi.STATE_SHOWING):
+        return True
+    if state.contains(pyatspi.STATE_VISIBLE):
+        return True
+    return False
+
+
+# Search a visible UI component under the cursor and get it's
+# name and extensions.
+def search_text_linux(d, x, y, accessible, spaces="  "):
+    if is_visible_linux(d, accessible) == False:
+        return None, None
+    comp = accessible.queryComponent()
+    el = comp.getAccessibleAtPoint(
+            x, y, pyatspi.DESKTOP_COORDS)
+    if not el:
+        return None, None
+    if is_visible_linux(d, el) == False:
+        return None, None
+    if PRINT_DEBUG_INFO:
+        print(spaces + f"- {accessible} -> {el})")
+    if el.name and len(el.name) > 0:
+        if PRINT_DEBUG_INFO:
+            print(spaces + f"=> Found! {el.name}")
+        text = el.name
+        extents = el.queryComponent().getExtents(
+                pyatspi.DESKTOP_COORDS)
+        return text, extents
+    # Try another search method.
+    for child in accessible:
+        t,e = search_text_linux(
+                d,x,y, child, spaces + "  ")
+        if t: return t,e
+    return None, None
+
+
 # Linux version of get_text_under_cursor():
 def get_text_under_cursor_linux(x, y):
     if sys.platform != SYS_LINUX:
         if PRINT_DEBUG_INFO:
             print("This script is only supported on Linux.")
-        return None, None
+        return "", (0,0,0,0)
 
     try:
         d = display.Display()
@@ -198,25 +251,20 @@ def get_text_under_cursor_linux(x, y):
             apps = [app for app in desktop 
                     if app.get_process_id() == pid]
             for app in apps:
+                if is_visible_linux(d, app) == False:
+                    continue
                 if PRINT_DEBUG_INFO:
-                    print(f"  {app} {app.get_process_id()}")
+                    print(f"- {app} {app.get_process_id()}")
                 for obj in app:
                     try:
-                        comp = obj.queryComponent()
-                        el = comp.getAccessibleAtPoint(
-                                x, y, pyatspi.DESKTOP_COORDS)
-                        if not el:
-                            continue
+                        text, ext = search_text_linux(d,x,y,obj)
+                        if text:
+                            return text, ext
+                    except Exception as e:
                         if PRINT_DEBUG_INFO:
-                            print(f"    {obj} -> {el}")
-                        if el.name and len(el.name) > 0:
-                            if PRINT_DEBUG_INFO:
-                                print(f"Found! {el.name}")
-                            text = el.name
-                            extents = el.queryComponent().getExtents(
-                                    pyatspi.DESKTOP_COORDS)
-                            return text, extents
-                    except:
+                            print(f"Exception from " + 
+                                  "search_text_linux(): " + 
+                                  str(e))
                         pass
         return "", (0,0,0,0)
 
@@ -476,7 +524,7 @@ class SystemTrayApp(QObject):
             (text, r) = get_text_under_cursor()
             self.overlay.set_pos(*r)
             if text:
-                pyperclip.copy(text)
+                pyperclip.copy(text[:MAX_TEXT_LENGTH])
                 print(f"[✓] Copied: {text}")
             else:
                 print("[×] No text available at cursor")
@@ -492,7 +540,7 @@ class SystemTrayApp(QObject):
             self.overlay.set_pos(*r)
             if text:
                 mp3_file_name = self.mp3_files[self.cur_mp3]
-                asyncio.run(self.tts(text, VOICE))
+                asyncio.run(self.tts(text[:MAX_TEXT_LENGTH], VOICE))
                 print(f"[✓] Read: {text} ({mp3_file_name})")
             else:
                 print("[×] No text available at cursor")
@@ -506,9 +554,9 @@ class SystemTrayApp(QObject):
             (text, r) = get_text_under_cursor()
             self.overlay.set_pos(*r)
             if text:
-                tr_text = translate_text(text)
+                tr_text = translate_text(text[:MAX_TEXT_LENGTH])
                 mp3_file_name = self.mp3_files[self.cur_mp3]
-                asyncio.run(self.tts(tr_text, VOICE_TR))
+                asyncio.run(self.tts(tr_text[:MAX_TEXT_LENGTH], VOICE_TR))
                 print(f"[✓] Translate: {text} -> {tr_text} ({mp3_file_name})")
             else:
                 print("[×] No text available at cursor")
