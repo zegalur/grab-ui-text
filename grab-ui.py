@@ -91,15 +91,6 @@ from just_playback import Playback
 from deep_translator import GoogleTranslator
 
 
-######################### Disable Keyboard Interrupt ##########################
-
-import signal
-
-signal.signal(signal.SIGINT,  signal.SIG_IGN)
-signal.signal(signal.SIGQUIT, signal.SIG_IGN)
-signal.signal(signal.SIGTSTP, signal.SIG_IGN)
-
-
 ########################### System Dependent Imports ##########################
 
 # Possible sys.platform values:
@@ -109,6 +100,13 @@ SYS_WINDOWS = "win32"
 SYS_LINUX = "linux"
 #SYS_MACOS = "darwin"
 SUPPORTED_PLATFORMS = [ SYS_WINDOWS, SYS_LINUX ]
+
+# Disable Keyboard Interrupt:
+import signal
+signal.signal(signal.SIGINT,  signal.SIG_IGN)
+if sys.platform != SYS_WINDOWS:
+    signal.signal(signal.SIGQUIT, signal.SIG_IGN)
+    signal.signal(signal.SIGTSTP, signal.SIG_IGN)
 
 os_dep = {}
 
