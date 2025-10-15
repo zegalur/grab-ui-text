@@ -1,6 +1,6 @@
 # ![(icon)](other/icon.svg) GrabUIText <small>(v1.0.0)</small>
 
-A free tool for grabbing UI text from under the cursor.
+A free tool for grabbing UI text from under the mouse cursor.
 Designed for language learners who have just switched their OS to the target language.
 It lets you copy, translate, and read aloud UI text with simple keyboard shortcuts. It doesn't use OCR. Instead, it uses native OS functions to retrieve the raw text.
 
