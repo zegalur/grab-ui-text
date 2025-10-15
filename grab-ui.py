@@ -28,7 +28,7 @@ TR_FROM = "ja"
 TR_TO = "en"
 
 # When `True`, forces to print additional debug information.
-PRINT_DEBUG_INFO = True
+PRINT_DEBUG_INFO = False
 
 # Overlay rectangle colors:
 OVERLAY_BORDER_COLOR = (0, 255, 71, 128)
@@ -39,6 +39,9 @@ OVERLAY_DURATION = 10000
 
 # The number of temporary MP3 files (must be >1):
 MP3_COUNT = 10
+
+# Maximum text length:
+MAX_TEXT_LENGTH = 128
 
 # Tray icon file:
 ICON_FILE = "other/icon.svg"
@@ -86,6 +89,15 @@ import edge_tts
 
 from just_playback import Playback
 from deep_translator import GoogleTranslator
+
+
+######################### Disable Keyboard Interrupt ##########################
+
+import signal
+
+signal.signal(signal.SIGINT,  signal.SIG_IGN)
+signal.signal(signal.SIGQUIT, signal.SIG_IGN)
+signal.signal(signal.SIGTSTP, signal.SIG_IGN)
 
 
 ########################### System Dependent Imports ##########################
@@ -178,6 +190,8 @@ def get_window_pid_linux(displ, win_id):
 
 # Checks if accessible is visible.
 def is_visible_linux(d, acc):
+    return True
+    # TODO: fix: Visibility check isn't working.
     state = acc.getState()
     if state.contains(pyatspi.STATE_ICONIFIED):
         return False
@@ -512,7 +526,7 @@ class SystemTrayApp(QObject):
             (text, r) = get_text_under_cursor()
             self.overlay.set_pos(*r)
             if text:
-                pyperclip.copy(text)
+                pyperclip.copy(text[:MAX_TEXT_LENGTH])
                 print(f"[✓] Copied: {text}")
             else:
                 print("[×] No text available at cursor")
@@ -528,7 +542,7 @@ class SystemTrayApp(QObject):
             self.overlay.set_pos(*r)
             if text:
                 mp3_file_name = self.mp3_files[self.cur_mp3]
-                asyncio.run(self.tts(text, VOICE))
+                asyncio.run(self.tts(text[:MAX_TEXT_LENGTH], VOICE))
                 print(f"[✓] Read: {text} ({mp3_file_name})")
             else:
                 print("[×] No text available at cursor")
@@ -542,9 +556,9 @@ class SystemTrayApp(QObject):
             (text, r) = get_text_under_cursor()
             self.overlay.set_pos(*r)
             if text:
-                tr_text = translate_text(text)
+                tr_text = translate_text(text[:MAX_TEXT_LENGTH])
                 mp3_file_name = self.mp3_files[self.cur_mp3]
-                asyncio.run(self.tts(tr_text, VOICE_TR))
+                asyncio.run(self.tts(tr_text[:MAX_TEXT_LENGTH], VOICE_TR))
                 print(f"[✓] Translate: {text} -> {tr_text} ({mp3_file_name})")
             else:
                 print("[×] No text available at cursor")
