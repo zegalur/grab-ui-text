@@ -110,6 +110,7 @@ All configurable settings are at the top of `grab-ui.py`:
 sudo apt install picom
 picom --config /dev/null &
 ```
+3. (*Linux*) Minimized windows are still treated as fully visible - unfortunately, this is a bug in the AT-SPI. It either needs an alternative method to check visibility or will be fixed in a future AT-SPI update.
 
 ## License
 
