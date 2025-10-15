@@ -104,7 +104,8 @@ All configurable settings are at the top of `grab-ui.py`:
 
 ## Troubleshooting
 
-1. (*Linux*) No transparency - try these commands:
+1. Sometimes text from a window isn’t available because GrabUIText doesn’t have permission to analyze that window. If you really need it, try running the script in Administrator mode.
+2. (*Linux*) No transparency - try these commands:
 ```bash
 sudo apt install picom
 picom --config /dev/null &
