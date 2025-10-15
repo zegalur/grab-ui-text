@@ -1,4 +1,4 @@
-# ![(icon)](other/icon.svg) GrabUIText <small>(v1.0.0)</small>
+# ![(icon)](other/icon.svg) GrabUIText <small>(v1.1.0)</small>
 
 A free tool for grabbing UI text from under the mouse cursor.
 Designed for language learners who have just switched their OS to the target language.
