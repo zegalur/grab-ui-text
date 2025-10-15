@@ -5,7 +5,6 @@ GrabUIText TODO list
 ### To Do
 
 - [ ] Add MacOS support.
-- [ ] Clip text to MAX_STR_LEN.
 
 ### In Progress
 
@@ -13,4 +12,4 @@ GrabUIText TODO list
 
 - [x] First working version.
 - [x] Add Linux support.
-
+- [x] Clip text to MAX_TEXT_LENGHT.
