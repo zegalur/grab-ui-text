@@ -105,12 +105,13 @@ All configurable settings are at the top of `grab-ui.py`:
 ## Troubleshooting
 
 1. Sometimes text from a window isn’t available because GrabUIText doesn’t have permission to analyze that window. If you really need it, try running the script in Administrator mode.
-2. (*Linux*) No transparency - try these commands:
+2. (*Linux*) No transparency - Try these commands:
 ```bash
 sudo apt install picom
 picom --config /dev/null &
 ```
-3. (*Linux*) Minimized windows are still treated as fully visible - unfortunately, this is a bug in the AT-SPI. It either needs an alternative method to check visibility or will be fixed in a future AT-SPI update.
+3. (*Linux*) Minimized windows are still treated as fully visible - Unfortunately, this is a bug in the AT-SPI. It either needs an alternative method to check visibility or will be fixed in a future AT-SPI update.
+4. `[!] Error: Cannot connect to host api.msedgeservices.com: ... certificate has expired (_ssl.c:1077)')]` - This is an issue on Microsoft’s end - the server is serving an expired certificate. It may be fixed by them within a few hours or days.
 
 ## License
 
