@@ -99,7 +99,7 @@ All configurable settings are at the top of `grab-ui.py`:
 
 ## Limitations
 
-- Because GrabUIText doesn't use OCR, it works only with applications that render their UI using the OS's native API. 
+- Because GrabUIText doesn't use OCR, it works only with apps that render their UI using the OS's native API. 
 - **Translation and text-to-speech require an Internet connection.**
 
 ## Troubleshooting
